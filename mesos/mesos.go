@@ -31,6 +31,14 @@ func (c *Client) GetState() (State, error) {
 	stateURL := url.URL{Scheme: "http", Host: c.host, Path: "/state.json"}
 	var decodedResponse State
 	err := c.Get(stateURL, &decodedResponse)
+	if err != nil {
+		return decodedResponse, err
+	}
+	// strip "master@" from beginning of leader
+	leader := decodedResponse.Leader[7:]
+
+	leaderURL := url.URL{Scheme: "http", Host: leader, Path: "/state.json"}
+	err = c.Get(leaderURL, &decodedResponse)
 	return decodedResponse, err
 }
 

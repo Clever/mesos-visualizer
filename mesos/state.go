@@ -72,12 +72,17 @@ type Task struct {
 	ExecutorID  string    `json:"executor_id"`
 	FrameworkID string    `json:"framework_id"`
 	ID          string    `json:"id"`
-	Labels      []string  `json:"labels"`
+	Labels      []Label   `json:"labels"`
 	Name        string    `json:"name"`
 	Resources   Resources `json:"resources"`
 	SlaveID     string    `json:"slave_id"`
 	State       string    `json:"state"`
 	Statuses    []Status  `json:"statuses"`
+}
+
+type Label struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 type Status struct {
