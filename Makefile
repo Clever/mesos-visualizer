@@ -27,7 +27,7 @@ $(PKGS): $(GOPATH)/bin/golint
 	@go test -v $@
 
 build:
-	go build -o ./bin/mesos-visualizer
+	go build -o mesos-visualizer
 
 run: build
-	./bin/mesos-visualizer
+	./mesos-visualizer
