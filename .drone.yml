@@ -1,4 +1,4 @@
-image: bradrydzewski/go:1.4
+image: clever/drone-go:1.5
 notify:
   email:
     recipients:
@@ -23,3 +23,6 @@ publish:
     username: $$docker_username
     when:
       branch: master
+script:
+- make test
+- make build
