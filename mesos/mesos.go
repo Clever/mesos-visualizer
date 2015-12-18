@@ -9,9 +9,9 @@ import (
 type ResourceNode struct {
 	Name        string         `json:"name"`
 	Children    []ResourceNode `json:"children,omitempty"`
-	Memory      int64          `json:"memory,omitempty"`
+	Memory      float64        `json:"memory,omitempty"`
 	CPU         float64        `json:"cpu,omitempty"`
-	MemoryTotal int64          `json:"memory_total,omitempty"`
+	MemoryTotal float64        `json:"memory_total,omitempty"`
 	CPUTotal    float64        `json:"cpu_total,omitempty"`
 }
 
@@ -67,7 +67,7 @@ func (c *Client) GetResourceGraph() (ResourceNode, error) {
 		return ResourceNode{}, err
 	}
 
-	memTotal := int64(0)
+	memTotal := 0.0
 	cpuTotal := 0.0
 
 	slaveToTaskMap := buildSlaveToTaskMap(state)
@@ -75,7 +75,7 @@ func (c *Client) GetResourceGraph() (ResourceNode, error) {
 	slaveNodes := []ResourceNode{}
 	for _, slave := range state.Slaves {
 		slaveCPU := 0.0
-		slaveMem := int64(0)
+		slaveMem := 0.0
 
 		cpuTotal += slave.Resources.CPUs
 		memTotal += slave.Resources.Mem
