@@ -1,4 +1,3 @@
-
 var width = 960,
     height = 900,
     radius = Math.min(width, height) / 2 - 30;
@@ -10,6 +9,14 @@ var y = d3.scale.sqrt()
         .range([0, radius]);
 
 var color = d3.scale.category20();
+
+var colorByApp = function(d) {
+    return d.children ? utilColor(d) : color(d.name.split(".")[0]);
+};
+
+var colorByEnv = function(d) {
+    return d.children ? utilColor(d) : color(d.name.split(".")[1]);
+};
 
 var svg = d3.select("body").append("svg")
         .attr("width", width)
@@ -58,6 +65,7 @@ function utilColor(d) {
 var node;
 
 var displayType = "memory";
+var colorType = "app";
 
 d3.json("resources.json", function(error, root) {
     node = root;
@@ -66,7 +74,7 @@ d3.json("resources.json", function(error, root) {
             .enter().append("path")
             .attr("display", function(d) { return d.name == "Unused" ? "none" : null; })
             .attr("d", arc)
-            .style("fill", function(d) { return d.children ? utilColor(d) : color(d.name.split(".")[0]); })
+            .style("fill", colorType == "app" ? colorByApp : colorByEnv)
             .on("click", click)
             .on("mouseover", function (d) {
                 var value = displayType == "cpu" ? d.cpu.toFixed(2) : d.memory;
@@ -74,7 +82,7 @@ d3.json("resources.json", function(error, root) {
                 var value_formatted = displayType == "cpu" ? d.cpu.toFixed(2) + " CPU(s)" : getReadableSize(d.memory);
                 var total_formatted = displayType == "cpu" ? ((d.cpu_total && d.cpu_total.toFixed(2)) || "") + " CPU(s)" : getReadableSize(d.memory_total);
                 var percent = Math.round(1000 * value / total) / 10;
-                tooltip.select('.label').html(d.name.split(".")[0]);
+                tooltip.select('.label').html(d.name/*.split(".")[0]*/);
                 tooltip.select('.count').html(d.children ? value_formatted + " / " + total_formatted : value_formatted);
                 tooltip.select('.percent').html(d.children ? percent + "% Utilization" : "");
                 tooltip.style('display', 'block');
@@ -84,17 +92,30 @@ d3.json("resources.json", function(error, root) {
             })
             .each(stash);
 
-    d3.selectAll("input").on("change", function change() {
+    d3.selectAll("input.value").on("change", function change() {
         var value = this.value === "cpu"
                 ? function(d) { displayType = "cpu"; return d.cpu; }
             : function(d) { displayType = "memory"; return d.memory; };
 
         path
             .data(partition.value(value).nodes)
-        
+
             .transition()
             .duration(1000)
-            .style("fill", function(d) { return d.children ? utilColor(d) : color(d.name.split(".")[0]); })
+            .style("fill", colorType === "app" ? colorByApp : colorByEnv)
+            .attrTween("d", arcTweenData);
+    });
+
+    d3.selectAll("input.color").on("change", function change() {
+        var colorFunc = this.value === "app"
+                ? colorByApp : colorByEnv;
+        colorType = this.value;
+
+        path
+            .data(partition.nodes)
+            .transition()
+            .duration(1000)
+            .style("fill", colorFunc)
             .attrTween("d", arcTweenData);
     });
 
