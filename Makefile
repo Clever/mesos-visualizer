@@ -1,33 +1,24 @@
+include golang.mk
+.DEFAULT_GOAL := test # override default goal set in library makefile
+
 .PHONY: all test build clean
 SHELL := /bin/bash
-PKGS = $(shell GO15VENDOREXPERIMENT=1 go list ./... | grep -v "vendor/")
-GOVERSION := $(shell go version | grep 1.5)
-ifeq "$(GOVERSION)" ""
-  $(error must be running Go version 1.5)
-endif
+PKG := github.com/Clever/mesos-visualizer
+PKGS := $(shell go list ./... | grep -v /vendor/)
+EXECUTABLE := $(basename $(PKG))
+$(eval $(call golang-version-check,1.5))
 
-export GO15VENDOREXPERIMENT=1
-
-all: build test run
-
-$(GOPATH)/bin/golint:
-	@go get github.com/golang/lint/golint
-
-test: $(PKGS)
-
-$(PKGS): $(GOPATH)/bin/golint
-	@echo ""
-	@echo "Formatting $@..."
-	@gofmt -w=true $(GOPATH)/src/$@/*.go
-	@echo ""
-	@echo "Linting $@..."
-	@$(GOPATH)/bin/golint $@
-	@echo ""
-	@echo "Testing $@..."
-	@go test -v $@
+all: test build run
 
 build:
-	go build -o mesos-visualizer
+	go build -o $(EXECUTABLE) $(PKG)
 
 run: build
 	./mesos-visualizer
+
+test: $(PKGS)
+$(PKGS): golang-test-all-deps
+	$(call golang-test-all,$@)
+
+vendor: golang-godep-vendor-deps
+	$(call golang-godep-vendor,$(PKGS))
