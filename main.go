@@ -20,7 +20,7 @@ func init() {
 func main() {
 	http.HandleFunc("/resources.json", resourcesHandler)
 	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./static"))))
-	log.Fatal(http.ListenAndServe(":8888", nil))
+	log.Fatal(http.ListenAndServe(":80", nil))
 }
 
 func resourcesHandler(w http.ResponseWriter, r *http.Request) {

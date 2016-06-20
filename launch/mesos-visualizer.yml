@@ -7,5 +7,5 @@ resources:
   max_mem: .1
 expose:                # list of ports to expose
   - name: http         # identifier for this port mapping
-    port: 8888         # port to map to inside the container
+    port: 80           # port to map to inside the container
     bind: 80           # NOTE: value ignored by mesos
