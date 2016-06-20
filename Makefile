@@ -11,6 +11,7 @@ $(eval $(call golang-version-check,1.6))
 all: test build run
 
 build:
+	go get ./...
 	go build -o $(EXECUTABLE) $(PKG)
 
 run: build
