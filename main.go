@@ -10,11 +10,16 @@ import (
 )
 
 var (
-	Cluster string
+	Cluster            string
+	AWSAccessKeyID     string
+	AWSSecretAccessKey string
 )
 
 func init() {
 	Cluster = getEnv("CLUSTER")
+	AWSAccessKeyID = getEnv("AWS_ACCESS_KEY_ID")
+	AWSSecretAccessKey = getEnv("AWS_SECRET_ACCESS_KEY")
+
 }
 
 func main() {
@@ -24,7 +29,7 @@ func main() {
 }
 
 func resourcesHandler(w http.ResponseWriter, r *http.Request) {
-	c := ecs.NewClient(Cluster)
+	c := ecs.NewClient(Cluster, AWSAccessKeyID, AWSSecretAccessKey)
 	resourceGraph, err := c.GetResourceGraph()
 	if err != nil {
 		log.Fatal(err)
