@@ -14,7 +14,7 @@ $(GOPATH)/bin/glide:
 all: test build run
 
 build:
-	go build -o $(EXECUTABLE) $(PKG)
+	@CGO_ENABLED=0 go build -a -installsuffix cgo -o $(EXECUTABLE) $(PKG)
 
 run: build
 	./mesos-visualizer
