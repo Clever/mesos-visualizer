@@ -1,8 +1,6 @@
 package ecs
 
 import (
-	"errors"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -61,21 +59,16 @@ func (c *Client) GetResourceGraph() (ResourceNode, error) {
 
 	slaveNodes := []ResourceNode{}
 
-	for _, containerInstanceARN := range containerInstanceARNs {
-		describeContainerInstancesInput := &ecs.DescribeContainerInstancesInput{
-			Cluster:            aws.String(clusterName),
-			ContainerInstances: []*string{containerInstanceARN},
-		}
-		resp, err := c.client.DescribeContainerInstances(describeContainerInstancesInput)
-		if err != nil {
-			return ResourceNode{}, err
-		}
+	describeContainerInstancesInput := &ecs.DescribeContainerInstancesInput{
+		Cluster:            aws.String(clusterName),
+		ContainerInstances: containerInstanceARNs,
+	}
+	dresp, err := c.client.DescribeContainerInstances(describeContainerInstancesInput)
+	if err != nil {
+		return ResourceNode{}, err
+	}
 
-		if len(resp.ContainerInstances) != 1 {
-			return ResourceNode{}, errors.New("wrong number of container instances")
-		}
-
-		containerInstance := resp.ContainerInstances[0]
+	for _, containerInstance := range dresp.ContainerInstances {
 		slaveNode := ResourceNode{
 			Name:     *containerInstance.Ec2InstanceId,
 			Children: []ResourceNode{},
