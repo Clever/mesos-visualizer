@@ -1,8 +1,7 @@
 run:
   type: docker
 env:
-  - MESOS_HOST
-  - MESOS_PORT
+  - CLUSTER
 resources:
   cpu: .1
   max_mem: .1
