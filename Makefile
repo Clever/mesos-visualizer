@@ -8,10 +8,12 @@ PKGS := $(shell go list ./... | grep -v /vendor/)
 EXECUTABLE := $(shell basename $(PKG))
 $(eval $(call golang-version-check,1.6))
 
+$(GOPATH)/bin/glide:
+	@go get github.com/Masterminds/glide
+
 all: test build run
 
 build:
-	go get ./...
 	go build -o $(EXECUTABLE) $(PKG)
 
 run: build
@@ -23,3 +25,6 @@ $(PKGS): golang-test-all-deps
 
 vendor: golang-godep-vendor-deps
 	$(call golang-godep-vendor,$(PKGS))
+
+install_deps: $(GOPATH)/bin/glide
+	@$(GOPATH)/bin/glide install
