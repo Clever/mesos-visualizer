@@ -2,22 +2,19 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/Clever/mesos-visualizer/mesos"
+	"github.com/Clever/mesos-visualizer/ecs"
 )
 
 var (
-	MesosHost string
-	MesosPort string
+	Cluster string
 )
 
 func init() {
-	MesosHost = getEnv("MESOS_HOST")
-	MesosPort = getEnv("MESOS_PORT")
+	Cluster = getEnv("CLUSTER")
 }
 
 func main() {
@@ -27,7 +24,7 @@ func main() {
 }
 
 func resourcesHandler(w http.ResponseWriter, r *http.Request) {
-	c := mesos.NewClient(fmt.Sprintf("%s:%s", MesosHost, MesosPort))
+	c := ecs.NewClient()
 	resourceGraph, err := c.GetResourceGraph()
 	if err != nil {
 		log.Fatal(err)

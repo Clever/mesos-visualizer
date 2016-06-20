@@ -11,11 +11,11 @@ var y = d3.scale.sqrt()
 var color = d3.scale.category20();
 
 var colorByApp = function(d) {
-    return d.children ? utilColor(d) : color(d.name.split(".")[0]);
+    return d.children ? utilColor(d) : color(d.name.split("--")[1]);
 };
 
 var colorByEnv = function(d) {
-    return d.children ? utilColor(d) : color(d.name.split(".")[1]);
+    return d.children ? utilColor(d) : color(d.name.split("--")[0]);
 };
 
 var svg = d3.select("body").append("svg")
