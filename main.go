@@ -24,7 +24,7 @@ func main() {
 }
 
 func resourcesHandler(w http.ResponseWriter, r *http.Request) {
-	c := ecs.NewClient()
+	c := ecs.NewClient(Cluster)
 	resourceGraph, err := c.GetResourceGraph()
 	if err != nil {
 		log.Fatal(err)
