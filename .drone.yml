@@ -11,7 +11,7 @@ notify:
 publish:
   catapult:
     url: $$catapult_url
-    application: "mesos-visualizer"
+    application: mesos-visualizer
   docker:
     docker_host: $$docker_server
     email: $$docker_email
@@ -23,6 +23,7 @@ publish:
     username: $$docker_username
     when:
       branch: master
+  report_card: {}
 script:
 - make install_deps
 - make test
