@@ -22,6 +22,12 @@ var svg = d3.select("#body").append("div")
         .append("svg:g")
         .attr("transform", "translate(.5,.5)");
 
+var valuefns = {
+    "cpu": (d => d.cpu),
+    "soft-mem": (d => d.soft_memory || d.max_memory),
+    "max-mem": (d => d.name == "Unused" ? 0 : d.max_memory) // Hide Unused node
+}
+
 d3.json("resources.json", function(data) {
     node = root = data;
 
@@ -51,18 +57,10 @@ d3.json("resources.json", function(data) {
     d3.select(window).on("click", function() { zoom(root); });
 
     d3.select("select").on("change", function() {
-        treemap.value(this.value == "cpu" ? cpu : memory).nodes(root);
+        treemap.value(valuefns[this.value]).nodes(root);
         zoom(node);
     });
 });
-
-function cpu(d) {
-    return d.cpu;
-}
-
-function memory(d) {
-    return d.memory;
-}
 
 function zoom(d) {
     var kx = w / d.dx, ky = h / d.dy;

@@ -5,16 +5,10 @@ body {
   width: 960px;
 }
 
-#mode-form {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-}
-
-#color-form {
-    position: absolute;
-    right: 10px;
-    top: 30px;
+.display-options {
+  margin: 10px;
+  float: right;
+  clear: both;
 }
 
 path {
