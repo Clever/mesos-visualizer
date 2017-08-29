@@ -42,8 +42,8 @@ d3.json("resources.json", function(data) {
             .on("click", function(d) { return zoom(node == d.parent ? root : d.parent); });
 
     cell.append("svg:rect")
-        .attr("width", function(d) { return d.dx - 1; })
-        .attr("height", function(d) { return d.dy - 1; })
+        .attr("width", function(d) { return Math.max(0, d.dx - 1); })
+        .attr("height", function(d) { return Math.max(0, d.dy - 1); })
         .style("fill", function(d) { return d.name == "Unused" ? d3.rgb(230,230,230) : color(d.parent.name); });
 
     cell.append("svg:text")
@@ -72,8 +72,8 @@ function zoom(d) {
             .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
 
     t.select("rect")
-        .attr("width", function(d) { return kx * d.dx - 1; })
-        .attr("height", function(d) { return ky * d.dy - 1; });
+        .attr("width", function(d) { return Math.max(0, kx * d.dx - 1); })
+        .attr("height", function(d) { return Math.max(0, ky * d.dy - 1); });
 
     t.select("text")
         .attr("x", function(d) { return kx * d.dx / 2; })
