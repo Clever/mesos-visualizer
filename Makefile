@@ -17,7 +17,10 @@ build:
 	@CGO_ENABLED=0 go build -a -installsuffix cgo -o $(EXECUTABLE) $(PKG)
 
 run: build
-	./mesos-visualizer
+	docker build -t mesos-visualizer .
+	@docker run -p 8080:80 \
+		-v `pwd`/static:/bin/static/ \
+		--env-file=<(echo -e $(_ARKLOC_ENV_FILE)) mesos-visualizer
 
 test: $(PKGS)
 $(PKGS): golang-test-all-deps
