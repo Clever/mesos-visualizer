@@ -25,6 +25,7 @@ func init() {
 func main() {
 	http.HandleFunc("/resources.json", resourcesHandler)
 	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./static"))))
+	log.Print("Listening on port 80...")
 	log.Fatal(http.ListenAndServe(":80", nil))
 }
 
