@@ -35,8 +35,19 @@ var tooltip = d3.select("body")
 tooltip.append('div').attr('class', 'label');
 tooltip.append('div').attr('class', 'count');
 tooltip.append('div').attr('class', 'percent');
+tooltip.append('div').attr('class', 'cpu');
+tooltip.append('div').attr('class', 'soft-mem');
+tooltip.append('div').attr('class', 'max-mem');
 
-function getReadableSize(sizeInBytes) {
+function prettyCPU(cpu) {
+    cpu = cpu || 0
+
+    return (cpu / 1024).toFixed(2) + "CPU(s)"
+}
+
+function prettyMem(sizeInBytes) {
+    sizeInBytes = sizeInBytes || 0;
+
     var i = -1;
     var byteUnits = [' GB', ' TB', 'PB', 'EB', 'ZB', 'YB'];
     do {
@@ -61,7 +72,7 @@ function utilColor(d) {
     } else if (displayType == "soft-mem") {
         hue = (d.soft_memory / d.memory_total) * 110;
     } else {
-        hue = (d.max_memory / d.memory_total) * 70;
+        hue = (d.max_memory / d.memory_total) * 90;
     }
     return d3.hsl(hue, .9, .5);
 };
@@ -96,26 +107,42 @@ d3.json("/resources/" + cluster, function(error, root) {
             var value, total, value_formatted, total_formatted;
 
             if(displayType == "cpu") {
-                value = d.cpu.toFixed(2);
+                value = d.cpu;
                 total = d.cpu_total;
-                value_formatted = d.cpu.toFixed(2) + " CPU(s)";
-                total_formatted = ((d.cpu_total && d.cpu_total.toFixed(2)) || "") + " CPU(s)";
+                value_formatted = prettyCPU(d.cpu);
+                total_formatted = prettyCPU(d.cpu_total);
             } else if(displayType == "soft-mem") {
                 value = d.soft_memory || d.max_memory;
                 total = d.memory_total;
-                value_formatted = getReadableSize(value);
-                total_formatted = getReadableSize(d.memory_total);
+                value_formatted = prettyMem(value);
+                total_formatted = prettyMem(d.memory_total);
             } else {
                 value = d.max_memory;
                 total = d.memory_total;
-                value_formatted = getReadableSize(d.max_memory);
-                total_formatted = getReadableSize(d.memory_total);
+                value_formatted = prettyMem(d.max_memory);
+                total_formatted = prettyMem(d.memory_total);
             }
 
-            var percent = Math.round(1000 * value / total) / 10;
             tooltip.select('.label').html(d.name/*.split(".")[0]*/);
-            tooltip.select('.count').html(d.children ? value_formatted + " / " + total_formatted : value_formatted);
-            tooltip.select('.percent').html(d.children ? percent + "% Utilization" : "");
+
+            if(d.children) {
+                var percent = Math.round(1000 * value / total) / 10;
+                tooltip.select('.count').html(value_formatted + " / " + total_formatted);
+                tooltip.select('.percent').html(percent + "% Utilization");
+
+                tooltip.selectAll('.count, .percent').style("display", "block");
+                tooltip.selectAll('.cpu, .soft-mem, .max-mem').style("display", "none");
+            } else {
+                tooltip.select('.cpu').html("CPU: " + prettyCPU(d.cpu));
+                tooltip.select('.soft-mem').html("Soft limit: " + prettyMem(d.soft_memory));
+                tooltip.select('.max-mem').html("Max memory: " + prettyMem(d.max_memory));
+
+                tooltip.selectAll('.count, .percent').style("display", "none");
+                tooltip.selectAll('.cpu, .soft-mem, .max-mem').style("display", "block");
+                tooltip.selectAll('.cpu, .soft-mem, .max-mem').style("font-weight", "normal");
+
+                tooltip.select('.' + displayType).style("font-weight", "bold");
+            }
             tooltip.style('display', 'block');
         })
         .on("mouseout", function() {
