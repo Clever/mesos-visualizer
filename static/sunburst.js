@@ -76,11 +76,14 @@ var colorType = "app";
 var valuefns = {
     "cpu": (d => d.cpu),
     "soft-mem": (d => d.soft_memory || d.max_memory),
-    "max-mem": (d => d.name == "Unused" ? 0 : d.max_memory) // Hide Unused node
+    "max-mem": ( // Hide Unused node.  Nodes in the max_mem view are often often be overallocated.
+        d => d.name == "Unused" ? 0 : d.max_memory
+    )
 }
 
+var cluster = window.location.search.substr(1)
 
-d3.json("resources.json", function(error, root) {
+d3.json("/resources/" + cluster, function(error, root) {
     node = root;
     var path = svg.datum(root).selectAll("path")
         .data(partition.nodes)
