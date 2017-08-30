@@ -10,7 +10,8 @@ import (
 type ResourceNode struct {
 	Name        string         `json:"name"`
 	Children    []ResourceNode `json:"children,omitempty"`
-	Memory      float64        `json:"memory,omitempty"`
+	SoftMemory  float64        `json:"soft_memory,omitempty"`
+	MaxMemory   float64        `json:"max_memory,omitempty"`
 	CPU         float64        `json:"cpu,omitempty"`
 	MemoryTotal float64        `json:"memory_total,omitempty"`
 	CPUTotal    float64        `json:"cpu_total,omitempty"`
@@ -42,6 +43,7 @@ func (c *Client) GetResourceGraph() (ResourceNode, error) {
 	memTotal := 0.0
 	cpuTotal := 0.0
 	memUsedTotal := 0.0
+	maxMemTotal := 0.0
 	cpuUsedTotal := 0.0
 
 	containerInstanceARNs := []*string{}
@@ -74,17 +76,18 @@ func (c *Client) GetResourceGraph() (ResourceNode, error) {
 			Children: []ResourceNode{},
 		}
 
-		var usedCPU float64
-		var usedMem float64
+		var usableCPU float64
+		var usableMem float64
 		var remainingCPU float64
 		var remainingMem float64
+		var maxPossibleMem float64
 
 		for _, resource := range containerInstance.RegisteredResources {
 			switch *resource.Name {
 			case "CPU":
-				usedCPU += float64(*resource.IntegerValue)
+				usableCPU += float64(*resource.IntegerValue)
 			case "MEMORY":
-				usedMem += float64(*resource.IntegerValue)
+				usableMem += float64(*resource.IntegerValue)
 			}
 		}
 
@@ -97,15 +100,15 @@ func (c *Client) GetResourceGraph() (ResourceNode, error) {
 			}
 		}
 
-		slaveNode.CPUTotal = usedCPU
-		slaveNode.MemoryTotal = usedMem
-		slaveNode.CPU = usedCPU - remainingCPU
-		slaveNode.Memory = usedMem - remainingMem
+		slaveNode.CPUTotal = usableCPU
+		slaveNode.MemoryTotal = usableMem
+		slaveNode.CPU = usableCPU - remainingCPU
+		slaveNode.SoftMemory = usableMem - remainingMem
 
-		cpuTotal += usedCPU
-		memTotal += usedMem
-		cpuUsedTotal += usedCPU - remainingCPU
-		memUsedTotal += usedMem - remainingMem
+		cpuTotal += usableCPU
+		memTotal += usableMem
+		cpuUsedTotal += usableCPU - remainingCPU
+		memUsedTotal += usableMem - remainingMem
 
 		listTasksInput := &ecs.ListTasksInput{
 			Cluster:           aws.String(clusterName),
@@ -145,18 +148,29 @@ func (c *Client) GetResourceGraph() (ResourceNode, error) {
 
 			cd := td.ContainerDefinitions[0]
 
+			var soft_mem, max_mem float64
+			max_mem = float64(*cd.Memory)
+			if cd.MemoryReservation != nil {
+				soft_mem = float64(*cd.MemoryReservation)
+			}
+
 			taskNode := ResourceNode{
-				Name:   *cd.Name,
-				Memory: float64(*cd.Memory),
-				CPU:    float64(*cd.Cpu),
+				Name:       *cd.Name,
+				MaxMemory:  max_mem,
+				SoftMemory: soft_mem,
+				CPU:        float64(*cd.Cpu),
 			}
 			slaveNode.Children = append(slaveNode.Children, taskNode)
+			maxMemTotal += max_mem
+			maxPossibleMem += max_mem
 		}
 		slaveUnused := ResourceNode{
-			Name:   "Unused",
-			Memory: remainingMem,
-			CPU:    remainingCPU,
+			Name:       "Unused",
+			SoftMemory: remainingMem,
+			MaxMemory:  remainingMem,
+			CPU:        remainingCPU,
 		}
+		slaveNode.MaxMemory = maxPossibleMem
 		slaveNode.Children = append(slaveNode.Children, slaveUnused)
 		slaveNodes = append(slaveNodes, slaveNode)
 
@@ -167,7 +181,8 @@ func (c *Client) GetResourceGraph() (ResourceNode, error) {
 		CPUTotal:    cpuTotal,
 		MemoryTotal: memTotal,
 		CPU:         cpuUsedTotal,
-		Memory:      memUsedTotal,
+		MaxMemory:   maxMemTotal,
+		SoftMemory:  memUsedTotal,
 		Children:    slaveNodes,
 	}
 	return root, nil

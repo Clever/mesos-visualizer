@@ -5,13 +5,17 @@
   <title> Resource Utilization - Sunburst </title>
 </head>
 <body>
-  <form id="mode-form">
-    <label><input type="radio" name="mode" value="cpu" class="value"> CPU</label>
-    <label><input type="radio" name="mode" value="memory" class="value" checked> Memory</label>
-  </form>
-  <form id="color-form">
-    <label><input type="radio" name="color" value="app" class="color" checked>Color by App</label>
-    <label><input type="radio" name="color" value="env" class="color">Color by Env</label>
+  <div class="display-options">
+    <form id="mode-form">
+      <label><input type="radio" name="mode" value="cpu" class="mode"> CPU</label>
+      <label><input type="radio" name="mode" value="max-mem" class="mode"> Max memory</label>
+      <label><input type="radio" name="mode" value="soft-mem" class="mode" checked> Soft memory</label>
+    </form>
+    <form id="color-form">
+      <label><input type="radio" name="color" value="app" class="color" checked>Color by App</label>
+      <label><input type="radio" name="color" value="env" class="color">Color by Env</label>
+    </form>
+  </div>
   <script src="https://d3js.org/d3.v3.min.js"></script>
   <script src="./sunburst.js"></script>
 </body>
