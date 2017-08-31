@@ -43,8 +43,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		{{ range $name, $arn := . }}
 		<h2>{{$name}}</h2>
 		<ul>
-			<li><a href="./static/sunburst.html?{{$arn}}">Resource Utilization - Sunburst</a></li>
-			<li><a href="./static/treemap.html?{{$arn}}">Resource Utilization - Treemap</a></li>
+			<li><a href="./static/sunburst.html?{{$name}}">Resource Utilization - Sunburst</a></li>
+			<li><a href="./static/treemap.html?{{$name}}">Resource Utilization - Treemap</a></li>
 		</ul>
 		{{end}}
 	</body>
@@ -61,8 +61,14 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func resourcesHandler(w http.ResponseWriter, req *http.Request) {
 	cluster := strings.TrimPrefix(req.URL.Path, "/resources/")
+	arn, ok := Clusters[cluster]
+	if !ok {
+		w.WriteHeader(404)
+		w.Write([]byte(`{"error": "unknow cluster"}`))
+		return
+	}
 
-	c := ecs.NewClient(cluster, AWSAccessKeyID, AWSSecretAccessKey)
+	c := ecs.NewClient(arn, AWSAccessKeyID, AWSSecretAccessKey)
 	resourceGraph, err := c.GetResourceGraph()
 	if err != nil {
 		log.Fatal(err)
