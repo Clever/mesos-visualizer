@@ -28,7 +28,9 @@ var valuefns = {
     "max-mem": (d => d.name == "Unused" ? 0 : d.max_memory) // Hide Unused node
 }
 
-d3.json("resources.json", function(data) {
+var cluster = window.location.search.substr(1)
+
+d3.json("/resources/" + cluster, function(data) {
     node = root = data;
 
     var nodes = treemap.nodes(root)

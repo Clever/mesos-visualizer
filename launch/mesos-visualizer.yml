@@ -1,7 +1,7 @@
 run:
   type: docker
 env:
-  - CLUSTER
+  - CLUSTERS
   - AWS_ACCESS_KEY_ID
   - AWS_SECRET_ACCESS_KEY
 resources:
@@ -10,5 +10,4 @@ resources:
 expose:                # list of ports to expose
   - name: http         # identifier for this port mapping
     port: 80           # port to map to inside the container
-    bind: 80           # NOTE: value ignored by mesos
 team: eng-infra
