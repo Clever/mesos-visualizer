@@ -64,7 +64,7 @@ func resourcesHandler(w http.ResponseWriter, req *http.Request) {
 	arn, ok := Clusters[cluster]
 	if !ok {
 		w.WriteHeader(404)
-		w.Write([]byte(`{"error": "unknow cluster"}`))
+		w.Write([]byte(`{"error": "unknown cluster"}`))
 		return
 	}
 
