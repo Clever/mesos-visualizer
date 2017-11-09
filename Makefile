@@ -6,10 +6,8 @@ SHELL := /bin/bash
 PKG := github.com/Clever/mesos-visualizer
 PKGS := $(shell go list ./... | grep -v /vendor/)
 EXECUTABLE := $(shell basename $(PKG))
-$(eval $(call golang-version-check,1.8))
+$(eval $(call golang-version-check,1.9))
 
-$(GOPATH)/bin/glide:
-	@go get github.com/Masterminds/glide
 
 all: test build run
 
@@ -26,8 +24,8 @@ test: $(PKGS)
 $(PKGS): golang-test-all-deps
 	$(call golang-test-all,$@)
 
-vendor: golang-godep-vendor-deps
-	$(call golang-godep-vendor,$(PKGS))
 
-install_deps: $(GOPATH)/bin/glide
-	@$(GOPATH)/bin/glide install
+
+
+install_deps: golang-dep-vendor-deps
+	$(call golang-dep-vendor)
