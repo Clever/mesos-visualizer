@@ -122,17 +122,31 @@ func (c *Client) GetResourceGraph() (ResourceNode, error) {
 			return ResourceNode{}, err
 		}
 
-		describeTasksInput := &ecs.DescribeTasksInput{
-			Cluster: aws.String(clusterName),
-			Tasks:   taskARNs,
+		idChunks := [][]*string{}
+		for len(taskARNs) > 0 {
+			end := 100
+			if len(taskARNs) < 100 {
+				end = len(taskARNs)
+			}
+
+			idChunks = append(idChunks, taskARNs[:end])
+			taskARNs = taskARNs[end:]
 		}
 
-		tresp, err := c.client.DescribeTasks(describeTasksInput)
-		if err != nil {
-			return ResourceNode{}, err
+		tasks := []*ecs.Task{}
+		for _, idChunk := range idChunks {
+			describeTasksInput := &ecs.DescribeTasksInput{
+				Cluster: aws.String(clusterName),
+				Tasks:   idChunk,
+			}
+			tresp, err := c.client.DescribeTasks(describeTasksInput)
+			if err != nil {
+				return ResourceNode{}, err
+			}
+			tasks = append(tasks, tresp.Tasks...)
 		}
 
-		for _, task := range tresp.Tasks {
+		for _, task := range tasks {
 			td, ok := taskDefinitionCache[*task.TaskDefinitionArn]
 			if !ok {
 				describeTaskDefinitionInput := &ecs.DescribeTaskDefinitionInput{
