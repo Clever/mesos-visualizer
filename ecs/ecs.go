@@ -37,6 +37,34 @@ func NewClient(cluster string, accessKeyID string, secretAccessKey string) *Clie
 	}
 }
 
+func (c *Client) getTasks(taskARNs []*string) ([]*ecs.Task, error) {
+	idChunks := [][]*string{}
+	for len(taskARNs) > 0 { // you can only get 100 tasks at a time from AWS
+		end := 100
+		if len(taskARNs) < 100 {
+			end = len(taskARNs)
+		}
+
+		idChunks = append(idChunks, taskARNs[:end])
+		taskARNs = taskARNs[end:]
+	}
+
+	tasks := []*ecs.Task{}
+	for _, idChunk := range idChunks {
+		describeTasksInput := &ecs.DescribeTasksInput{
+			Cluster: aws.String(c.cluster),
+			Tasks:   idChunk,
+		}
+		tresp, err := c.client.DescribeTasks(describeTasksInput)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, tresp.Tasks...)
+	}
+
+	return tasks, nil
+}
+
 func (c *Client) GetResourceGraph() (ResourceNode, error) {
 	clusterName := c.cluster
 
@@ -122,17 +150,12 @@ func (c *Client) GetResourceGraph() (ResourceNode, error) {
 			return ResourceNode{}, err
 		}
 
-		describeTasksInput := &ecs.DescribeTasksInput{
-			Cluster: aws.String(clusterName),
-			Tasks:   taskARNs,
-		}
-
-		tresp, err := c.client.DescribeTasks(describeTasksInput)
+		tasks, err := c.getTasks(taskARNs)
 		if err != nil {
 			return ResourceNode{}, err
 		}
 
-		for _, task := range tresp.Tasks {
+		for _, task := range tasks {
 			td, ok := taskDefinitionCache[*task.TaskDefinitionArn]
 			if !ok {
 				describeTaskDefinitionInput := &ecs.DescribeTaskDefinitionInput{
