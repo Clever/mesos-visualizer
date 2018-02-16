@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  branch = "master"
-  name = "github.com/Clever/mesos-visualizer"
-  packages = ["ecs"]
-  revision = "74b72b852c1ac1a1b92d98bdb4b0942364605e51"
-
-[[projects]]
   name = "github.com/aws/aws-sdk-go"
   packages = ["aws","aws/awserr","aws/awsutil","aws/client","aws/client/metadata","aws/corehandlers","aws/credentials","aws/credentials/ec2rolecreds","aws/credentials/endpointcreds","aws/credentials/stscreds","aws/defaults","aws/ec2metadata","aws/endpoints","aws/request","aws/session","aws/signer/v4","private/protocol","private/protocol/json/jsonutil","private/protocol/jsonrpc","private/protocol/query","private/protocol/query/queryutil","private/protocol/rest","private/protocol/xml/xmlutil","private/waiter","service/ecs","service/sts"]
   revision = "819b71cf8430e434c1eee7e7e8b0f2b8870be899"
@@ -28,6 +22,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8eac57c2ce630a0644f4191318e1ebe3e91318ade238b8e9e9e13ed428f7e03c"
+  inputs-digest = "d62eecdd959f5ce06b8b6700edfab7fb87b28e84eff6311bd2447ebf49011d99"
   solver-name = "gps-cdcl"
   solver-version = 1
