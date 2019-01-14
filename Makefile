@@ -12,12 +12,13 @@ $(eval $(call golang-version-check,1.10))
 all: test build run
 
 build:
-	@CGO_ENABLED=0 go build -a -installsuffix cgo -o $(EXECUTABLE) $(PKG)
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o $(EXECUTABLE) $(PKG)
 
 run: build
 	docker build -t mesos-visualizer .
 	@docker run -p 8080:80 \
 		-v `pwd`/static:/bin/static/ \
+		-v $(AWS_SHARED_CREDENTIALS_FILE):$(AWS_SHARED_CREDENTIALS_FILE) \
 		--env-file=<(echo -e $(_ARKLOC_ENV_FILE)) mesos-visualizer
 
 test: $(PKGS)

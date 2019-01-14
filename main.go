@@ -12,16 +12,11 @@ import (
 )
 
 var (
-	Clusters           map[string]string
-	AWSAccessKeyID     string
-	AWSSecretAccessKey string
+	clusters map[string]string
 )
 
 func init() {
-	Clusters = getEnvJSON("CLUSTERS")
-	AWSAccessKeyID = getEnv("AWS_ACCESS_KEY_ID")
-	AWSSecretAccessKey = getEnv("AWS_SECRET_ACCESS_KEY")
-
+	clusters = getEnvJSON("CLUSTERS")
 }
 
 func main() {
@@ -53,7 +48,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	err = tmpl.Execute(w, Clusters)
+	err = tmpl.Execute(w, clusters)
 	if err != nil {
 		panic(err)
 	}
@@ -61,14 +56,14 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func resourcesHandler(w http.ResponseWriter, req *http.Request) {
 	cluster := strings.TrimPrefix(req.URL.Path, "/resources/")
-	arn, ok := Clusters[cluster]
+	arn, ok := clusters[cluster]
 	if !ok {
 		w.WriteHeader(404)
 		w.Write([]byte(`{"error": "unknown cluster"}`))
 		return
 	}
 
-	c := ecs.NewClient(arn, AWSAccessKeyID, AWSSecretAccessKey)
+	c := ecs.NewClient(arn)
 	resourceGraph, err := c.GetResourceGraph()
 	if err != nil {
 		log.Fatal(err)
@@ -94,7 +89,7 @@ func getEnvJSON(envVar string) map[string]string {
 	var keyval map[string]string
 	err := json.Unmarshal([]byte(data), &keyval)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 
 	return keyval

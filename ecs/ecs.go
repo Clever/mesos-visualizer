@@ -2,7 +2,6 @@ package ecs
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecs"
 )
@@ -24,11 +23,10 @@ type Client struct {
 
 var taskDefinitionCache = map[string]*ecs.TaskDefinition{}
 
-func NewClient(cluster string, accessKeyID string, secretAccessKey string) *Client {
+func NewClient(cluster string) *Client {
 	awsConfig := &aws.Config{
-		Region:      aws.String("us-west-1"),
-		MaxRetries:  aws.Int(10),
-		Credentials: credentials.NewStaticCredentials(accessKeyID, secretAccessKey, ""),
+		Region:     aws.String("us-west-1"),
+		MaxRetries: aws.Int(10),
 	}
 	svc := ecs.New(session.New(), awsConfig)
 	return &Client{
