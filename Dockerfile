@@ -1,7 +1,7 @@
-FROM gliderlabs/alpine:3.2
+FROM alpine:3.10
 WORKDIR /bin
 ENTRYPOINT ["/bin/mesos-visualizer"]
 
-RUN apk-install ca-certificates
+RUN apk add ca-certificates && update-ca-certificates
 COPY mesos-visualizer /bin/mesos-visualizer
 ADD ./static/* /bin/static/
