@@ -1,13 +1,30 @@
 run:
   type: docker
 env:
-  - CLUSTERS
+- CLUSTERS
 resources:
   cpu: .1
   max_mem: .1
 expose:                # list of ports to expose
-  - name: http         # identifier for this port mapping
-    port: 80           # port to map to inside the container
+- name: http           # identifier for this port mapping
+  port: 80             # port to map to inside the container
 team: eng-infra
 aws:
   custom: true
+alarms:
+- type: InternalErrorAlarm
+  severity: minor
+  parameters:
+    threshold: 0.01
+  extraParameters:
+    source: Target
+- type: InternalErrorAlarm
+  severity: major
+  parameters:
+    threshold: 0.05
+  extraParameters:
+    source: Target
+- type: InternalErrorAlarm
+  severity: major
+  parameters:
+    threshold: 0.01
