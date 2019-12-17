@@ -28,3 +28,5 @@ alarms:
   severity: major
   parameters:
     threshold: 0.01
+  extraParameters:
+    source: ELB
